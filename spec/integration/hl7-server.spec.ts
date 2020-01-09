@@ -3,16 +3,21 @@ import { Server } from '../../src/hl7';
 import { readTestFile } from '../support/utils';
 
 describe('hl7 server tests', () => {
-  let server: Server;
+  let app: Server;
+  let server: net.Server;
 
   beforeEach(() => {
-    server = new Server();
-    server.listen(50001, 'localhost');
+    app = new Server();
+    server = app.listen(50001, 'localhost');
+  });
+
+  afterEach(() => {
+    server.close();
   });
 
   it('can receive message', done => {
-    server.on('message', hl7 => {
-      expect(hl7.segment('MSH')![0]).toBe('MSH');
+    app.use((req, resp, next) => {
+      expect(req.msg.segment('MSH')![0]).toBe('MSH');
       done();
     });
     const data = readTestFile('operating-theatre.bin');
