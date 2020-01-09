@@ -48,4 +48,10 @@ describe('mllp protocol tests', () => {
     incoming.push('\x0bhel');
     incoming.push('\x0bworld\x1c\x0d');
   });
+
+  it('can send message', () => {
+    const stream = new streams.WritableStream();
+    Protocol.send('hello', stream);
+    expect(stream.toString()).toBe('\x0bhello\x1c\x0d');
+  });
 });

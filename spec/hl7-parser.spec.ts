@@ -1,4 +1,4 @@
-import { parse } from '../src/hl7';
+import { parse, ACKCode } from '../src/hl7';
 import { readTestFile } from './support/utils';
 
 describe('hl7 parser tests', () => {
@@ -34,5 +34,31 @@ describe('hl7 parser tests', () => {
     expect(obx.length).toBe(6);
     expect(obx[0][3]).toBe('OTR_NO^OTRoomNumber');
     expect(obx[5][3]).toBe('C_DETAILS^Case Details');
+  });
+
+  it('dumps message correctly', () => {
+    const msg = readTestFile('operating-theatre.bin');
+    const hl7 = parse(msg);
+    expect(hl7.dump()).toBe(msg);
+  });
+
+  it('creates correct ack message', () => {
+    const msg = readTestFile('operating-theatre.bin');
+    const hl7 = parse(msg);
+    const ack = hl7.createACK(ACKCode.AE, 'test');
+
+    const msh = ack.json[0];
+    expect(msh[0]).toBe('MSH');
+    expect(msh[1]).toBe('^~\\\\&');
+    expect(msh[2]).toBe('ESB');
+    expect(msh[3]).toBe('ESB');
+    expect(msh[4]).toBe('OTM');
+    expect(msh[5]).toBe('OTM^CG');
+
+    const msa = ack.json[1];
+    expect(msa[0]).toBe('MSA');
+    expect(msa[1]).toBe('AE');
+    expect(msa[2]).toBe('20161019171955121101327');
+    expect(msa[3]).toBe('test');
   });
 });

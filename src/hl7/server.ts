@@ -12,7 +12,6 @@ export class Response {
   }
 }
 
-
 export class Server extends net.Server {
   constructor() {
     super();
@@ -83,7 +82,7 @@ export class Server extends net.Server {
     const mllp = new MLLPProtocol(socket);
     mllp.on('message', message => {
       const hl7 = parse(message);
-      this.emit('message', hl7);
+      this.emit('message', hl7, new Response(socket));
     });
   }
 }
