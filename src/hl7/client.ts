@@ -1,13 +1,14 @@
 import * as net from 'net';
 import { Connection, IncomingMiddleware, OutgoingMiddleware } from './connection';
 
-export class Server {
-  constructor() {
-    this._server = new net.Server(socket => this._onConnection(socket));
-  }
-
-  listen(port: number, host?: string): net.Server {
-    return this._server.listen(port, host);
+export class Client {
+  async connect(port: number, host: string): Promise<Connection> {
+    const socket = net.connect(port, host);
+    return new Promise<Connection>(res => {
+      socket.on('connect', () => {
+        res(new Connection(socket, this._incomingMdws, this._outgoingMdws));
+      });
+    })
   }
 
   useIncoming(middleware: IncomingMiddleware) {
@@ -18,11 +19,6 @@ export class Server {
     this._outgoingMdws.push(middleware);
   }
 
-  private _server: net.Server;
   private _incomingMdws: IncomingMiddleware[] = [];
   private _outgoingMdws: OutgoingMiddleware[] = [];
-
-  private _onConnection(socket: net.Socket): void {
-    new Connection(socket, this._incomingMdws, this._outgoingMdws);
-  }
 }

@@ -1,4 +1,4 @@
-import { parse, ACKCode } from '../src/hl7';
+import { ACKCode, parse } from '../src/hl7';
 import { readTestFile } from './support/utils';
 
 describe('hl7 parser tests', () => {
