@@ -1,0 +1,27 @@
+/**
+ * DO NOT EDIT, this is a generated file.
+ */
+
+import { CastError } from '..';
+import { HL7Message } from '../../hl7';
+
+export class {{class}} {
+  static fromHL7(hl7: HL7Message): {{class}} {
+    const seg = hl7.segment('{{segment}}');
+    if (seg === null) {
+      throw new CastError('missing segment "{{segment}}"');
+    }
+
+    return new {{class}}(
+{{#properties}}
+      seg[{{field}}],
+{{/properties}}
+    );
+  }
+
+  constructor(
+{{#properties}}
+    public {{name}}: string,
+{{/properties}}
+  ) {}
+}

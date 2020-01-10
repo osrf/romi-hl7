@@ -1,0 +1,54 @@
+[
+  {
+    file: 'patient.ts',
+    class: 'Patient',
+    segment: 'PID',
+    properties: [
+      { field: 3, name: 'id' },
+      { field: 5, name: 'name' },
+      { field: 7, name: 'dob' },
+      { field: 8, name: 'gender' },
+      { field: 10, name: 'race' },
+      { field: 11, name: 'address' },
+      { field: 15, name: 'primaryLanguage' },
+      { field: 16, name: 'martialStatus' },
+      { field: 17, name: 'religion' },
+    ],
+  },
+  {
+    file: 'patient-visit.ts',
+    class: 'PatientVisit',
+    segment: 'PV1',
+    properties: [
+      { field: 2, name: 'typeCareLevel' },
+      { field: 3, name: 'location' },
+      { field: 4, name: 'caseType' },
+      { field: 10, name: 'service' },
+      { field: 14, name: 'admitVia' },
+      { field: 19, name: 'case_' },
+      { field: 20, name: 'treatmentClass' },
+      { field: 36, name: 'dischargeDisposition' },
+      { field: 37, name: 'dischargeLocation' },
+      { field: 44, name: 'admitDateTime' },
+      { field: 45, name: 'actualDischargeDate' },
+    ]
+  },
+  {
+    file: 'patient-visit-2.ts',
+    class: 'PatientVisit2',
+    segment: 'PV2',
+    properties: [
+      { field: 2, name: 'treatmentCategory' },
+      { field: 9, name: 'expectedDischargeDate' },
+    ],
+  },
+  {
+    file: 'diagnosis-info.ts',
+    class: 'DiagnosisInfo',
+    segment: 'DG1',
+    properties: [
+      { field: 3, name: 'diagnosis' },
+      { field: 4, name: 'details' },
+    ],
+  },
+]

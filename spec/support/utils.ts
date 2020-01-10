@@ -1,4 +1,4 @@
-import { readFile, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import * as path from 'path';
 
 export function getTestFile(filePath: string): string {

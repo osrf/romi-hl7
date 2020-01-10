@@ -2,12 +2,19 @@ import * as net from 'net';
 import { Protocol as MLLPProtocol } from '../mllp';
 import { HL7Message, parse } from './parser';
 
-export type IncomingMiddleware = (msg: HL7Message, connection: Connection, next: () => void) => void;
-
-export type OutgoingMiddleware = (msg: HL7Message, next: () => void) => void;
+export type Middleware =
+  (msg: HL7Message, connection: Connection, next: () => void) => void;
 
 export class Connection {
-  constructor(socket: net.Socket, incomingMdws: IncomingMiddleware[], outgoingMdws: OutgoingMiddleware[]) {
+  get socket(): net.Socket {
+    return this._socket;
+  }
+
+  constructor(
+    socket: net.Socket,
+    incomingMdws: Middleware[],
+    outgoingMdws: Middleware[],
+  ) {
     this._socket = socket;
     this._incomingMdws = incomingMdws;
     this._outgoingMdws = outgoingMdws;
@@ -19,7 +26,7 @@ export class Connection {
     let i = 0;
     const next = () => {
       if (i < this._outgoingMdws.length) {
-        this._outgoingMdws[i](msg, next);
+        this._outgoingMdws[i](msg, this, next);
         i++;
       } else {
         MLLPProtocol.send(msg.dump(), this._socket);
@@ -28,10 +35,14 @@ export class Connection {
     next();
   }
 
+  end(): void {
+    this._socket.end();
+  }
+
   private _socket: net.Socket;
   private _mllp: MLLPProtocol;
-  private _incomingMdws: IncomingMiddleware[];
-  private _outgoingMdws: OutgoingMiddleware[];
+  private _incomingMdws: Middleware[];
+  private _outgoingMdws: Middleware[];
 
   private _onMessage(msg: string) {
     const hl7 = parse(msg);

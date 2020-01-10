@@ -1,0 +1,55 @@
+/**
+ * DO NOT EDIT, this is a generated file.
+ */
+
+import { CastError } from '..';
+import { HL7Message } from '../../hl7';
+
+export class {{class}} {
+  static fromHL7(hl7: HL7Message): {{class}} {
+    const msh = hl7.segment('MSH')!;
+
+    const messageType = hl7.components(msh[9]);
+    if (messageType[0] !== 'ORU' || messageType[1] !== 'R01') {
+      throw new CastError('wrong message type');
+    }
+
+    const oru = hl7.segment('ORU');
+    if (oru === null) {
+      throw new CastError('missing ORU segment');
+    }
+
+    const observationId = hl7.components(oru[4]);
+    if (observationId[0] !== '{{id}}') {
+      throw new CastError('expected observation id "{{id}}"');
+    }
+
+{{#properties}}
+    let {{name}} = '';
+{{/properties}}
+
+    const obxs = hl7.allSegments('OBX');
+    for (const obx of obxs) {
+      const id = hl7.components(obx[4]);
+      switch (id[0]) {
+{{#properties}}
+        case '{{id}}': {
+          {{name}} = obx[5];
+          break;
+        }
+{{/properties}}
+      }
+    }
+    return new {{class}}(
+{{#properties}}
+      {{name}},
+{{/properties}}
+    );
+  }
+
+  constructor(
+{{#properties}}
+    public {{name}}: string,
+{{/properties}}
+  ) {}
+}
