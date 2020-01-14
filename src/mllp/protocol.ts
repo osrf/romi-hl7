@@ -1,8 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// needed to provide generic implementation for EventEmitter methods
+
 import { EventEmitter } from 'events';
 import { Readable, Writable } from 'stream';
 
+enum _MLLPParserState {
+  SOM,
+  MSG,
+  EOM,
+}
+
 export class Protocol extends EventEmitter {
-  static send(msg: string, stream: Writable) {
+  static send(msg: string, stream: Writable): void {
     stream.write(`\x0b${msg}\x1c\x0d`);
   }
 
@@ -89,10 +98,4 @@ export class Protocol extends EventEmitter {
       }
     }
   }
-}
-
-enum _MLLPParserState {
-  SOM,
-  MSG,
-  EOM,
 }

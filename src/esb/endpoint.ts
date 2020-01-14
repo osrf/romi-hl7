@@ -34,9 +34,11 @@ export class ServerEndpoint implements Endpoint {
   }
 
   send(msg: hl7.Message): void {
-    let it = this._connections.values().next();
-    while (!it.done) {
-      it.value.send(msg);
+    const it = this._connections.values();
+    let next = it.next();
+    while (!next.done) {
+      next.value.send(msg);
+      next = it.next();
     }
   }
 
@@ -44,7 +46,7 @@ export class ServerEndpoint implements Endpoint {
     this._app.useDriver(driver);
   }
 
-  private _onConnection(conn: hl7.Connection) {
+  private _onConnection(conn: hl7.Connection): void {
     conn.socket.on('close', () => {
       this._connections.delete(conn);
     });

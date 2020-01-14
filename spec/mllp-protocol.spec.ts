@@ -38,7 +38,7 @@ describe('mllp protocol tests', () => {
       }
     });
     incoming.push('\x0bhello\x1c\x0d\x0bworld\x1c\x0d');
-  })
+  });
 
   it('recovers from incomplete message', done => {
     mllp.on('message', message => {

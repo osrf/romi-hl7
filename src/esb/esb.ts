@@ -5,8 +5,8 @@ import { Endpoint } from './endpoint';
 import { CastError } from './error';
 
 export interface Request {
-  msg: hl7.Message,
-  conn: hl7.Connection,
+  msg: hl7.Message;
+  conn: hl7.Connection;
 }
 
 export type MessageType<T> = { fromHL7(hl7: hl7.Message): T };
@@ -29,7 +29,7 @@ export class ESB implements hl7.Driver {
   /**
    * Starts all endpoints, this is equivalent to calling `start` on each endpoints.
    */
-  startAll() {
+  startAll(): void {
     for (const ep of this._endpoints) {
       ep.start();
     }
@@ -78,7 +78,7 @@ export class ESB implements hl7.Driver {
     }));
   }
 
-  onIncoming(msg: hl7.Message, conn: hl7.Connection, _: () => void): void {
+  onIncoming(msg: hl7.Message, conn: hl7.Connection): void {
     this._msgSubject.next({
       msg: msg,
       conn: conn,

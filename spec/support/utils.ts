@@ -5,6 +5,6 @@ export function getTestFile(filePath: string): string {
   return path.join(__dirname, '../../../spec/data', filePath);
 }
 
-export function readTestFile(filePath: string, encoding: string = 'utf8'): string {
+export function readTestFile(filePath: string, encoding = 'utf8'): string {
   return readFileSync(getTestFile(filePath), { encoding: encoding });
 }

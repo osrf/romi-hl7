@@ -24,13 +24,13 @@ export class Connection {
 
   send(msg: Message): void {
     let i = 0;
-    const next = () => {
+    const next = (): void => {
       if (i < this._outgoingMdws.length) {
         this._outgoingMdws[i++](msg, this, next);
       } else {
         MLLPProtocol.send(msg.dump(), this._socket);
       }
-    }
+    };
     next();
   }
 
@@ -43,10 +43,10 @@ export class Connection {
   private _incomingMdws: Middleware[];
   private _outgoingMdws: Middleware[];
 
-  private _onMessage(msg: string) {
+  private _onMessage(msg: string): void {
     const hl7 = parse(msg);
     let i = 0;
-    const next = () => {
+    const next = (): void => {
       if (i < this._incomingMdws.length) {
         this._incomingMdws[i++](hl7, this, next);
       }

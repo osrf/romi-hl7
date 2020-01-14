@@ -1,7 +1,7 @@
 import { OperatingTheatre } from '../src/esb/models';
 import { Client, Message, createHeader } from '../src/hl7';
 
-async function sendOperatingTheatre() {
+async function sendOperatingTheatre(): Promise<void> {
   const client = new Client();
   const ot = new OperatingTheatre(
     'roomNumber',

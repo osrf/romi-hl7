@@ -9,6 +9,15 @@ export enum ACKCode {
 
 export type Segment = string[]
 
+export function toHL7DateString(date: Date): string {
+  return date.getFullYear() +
+    (date.getMonth() + 1).toString().padStart(2, '0') +
+    (date.getDate()).toString().padStart(2, '0') +
+    (date.getHours()).toString().padStart(2, '0') +
+    (date.getMinutes()).toString().padStart(2, '0') +
+    (date.getSeconds()).toString().padStart(2, '0');
+}
+
 // TODO: parse escape character
 export class Message {
   constructor(
@@ -125,15 +134,6 @@ export function parse(msg: string): Message {
     segments.push(fields);
   }
   return new Message(segments, encodingChars);
-}
-
-export function toHL7DateString(date: Date): string {
-  return date.getFullYear() +
-    (date.getMonth() + 1).toString().padStart(2, '0') +
-    (date.getDate()).toString().padStart(2, '0') +
-    (date.getHours()).toString().padStart(2, '0') +
-    (date.getMinutes()).toString().padStart(2, '0') +
-    (date.getSeconds()).toString().padStart(2, '0');
 }
 
 export function createHeader(
