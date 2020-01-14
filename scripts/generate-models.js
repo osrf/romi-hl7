@@ -8,6 +8,11 @@ const srcDir = path.join(__dirname, '..', 'src');
 
 const indexExports = [];
 
+const modelsDir = path.join(srcDir, 'esb', 'models');
+if (!fs.existsSync(modelsDir)) {
+  fs.mkdirSync(modelsDir);
+}
+
 function toExportName(file) {
   const name = path.basename(file);
   return './' + name.slice(0, name.lastIndexOf('.'));
@@ -25,6 +30,9 @@ function generateBasicModels() {
   const models = yaml.parse(modelsFile);
 
   for (const model of models) {
+    const file = path.join(modelsDir, model['file']);
+    console.log(`generating ${file}`);
+
     const values = {};
     let highestField = 0;
     for (const prop of model.properties) {
@@ -44,10 +52,7 @@ function generateBasicModels() {
     }
 
     const output = mustache.render(tmpl, model);
-    fs.writeFileSync(
-      path.join(srcDir, 'esb', 'models', model['file']),
-      output,
-    );
+    fs.writeFileSync(file, output);
     indexExports.push(toExportName(model['file']));
   }
 }
@@ -64,6 +69,9 @@ function generateObservationModels() {
   const models = yaml.parse(modelsFile);
 
   for (const model of models) {
+    const file = path.join(modelsDir, model['file']);
+    console.log(`generating ${file}`);
+
     let curSetID = 2;
     for (const prop of model.properties) {
       prop.setId = curSetID.toString();
@@ -71,26 +79,24 @@ function generateObservationModels() {
     }
 
     const output = mustache.render(tmpl, model);
-    fs.writeFileSync(
-      path.join(srcDir, 'esb', 'models', model['file']),
-      output,
-    );
+    fs.writeFileSync(file, output);
     indexExports.push(toExportName(model['file']));
   }
 }
 
 function generateModelIndex() {
+  const file = path.join(modelsDir, 'index.ts');
+  console.log(`generating ${file}`);
+
   const tmpl = fs.readFileSync(
     path.join(tmplDir, 'model-index.mustache'),
     { encoding: 'utf8' },
   );
   const output = mustache.render(tmpl, indexExports);
-  fs.writeFileSync(
-    path.join(srcDir, 'esb', 'models', 'index.ts'),
-    output,
-  );
+  fs.writeFileSync(file, output);
 }
 
 generateBasicModels();
 generateObservationModels();
 generateModelIndex();
+console.log('successfully generated esb models');

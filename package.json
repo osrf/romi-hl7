@@ -4,7 +4,10 @@
   "description": "hl7 + mllp protocol for RoMi",
   "main": "index.js",
   "scripts": {
-    "test": "jasmine"
+    "build": "node scripts/generate-models.js && tsc",
+    "watch": "tsc --watch",
+    "test": "jasmine",
+    "clean": "rm -rf dist && rm -rf src/esb/models"
   },
   "author": "Teo Koon Peng <koonpeng@openrobotics.org>",
   "license": "Apache-2.0",
