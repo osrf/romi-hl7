@@ -5,8 +5,8 @@ describe('hl7 parser tests', () => {
   it('can parse message', () => {
     const msg = readTestFile('operating-theatre.bin');
     const hl7 = parse(msg);
-    expect(hl7.json[0][0]).toBe('MSH');
-    expect(hl7.json[0][2]).toBe('OTM');
+    expect(hl7.segments[0][0]).toBe('MSH');
+    expect(hl7.segments[0][2]).toBe('OTM');
     const pid = hl7.segment('PID')!;
     expect(pid[0]).toBe('PID');
     expect(pid[1]).toBe('');
@@ -47,7 +47,7 @@ describe('hl7 parser tests', () => {
     const hl7 = parse(msg);
     const ack = hl7.createACK(ACKCode.AE, 'test');
 
-    const msh = ack.json[0];
+    const msh = ack.segments[0];
     expect(msh[0]).toBe('MSH');
     expect(msh[1]).toBe('^~\\\\&');
     expect(msh[2]).toBe('ESB');
@@ -55,7 +55,7 @@ describe('hl7 parser tests', () => {
     expect(msh[4]).toBe('OTM');
     expect(msh[5]).toBe('OTM^CG');
 
-    const msa = ack.json[1];
+    const msa = ack.segments[1];
     expect(msa[0]).toBe('MSA');
     expect(msa[1]).toBe('AE');
     expect(msa[2]).toBe('20161019171955121101327');

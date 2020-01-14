@@ -3,10 +3,10 @@
  */
 
 import { CastError } from '..';
-import { HL7Message } from '../../hl7';
+import { Message } from '../../hl7';
 
 export class Patient {
-  static fromHL7(hl7: HL7Message): Patient {
+  static fromHL7(hl7: Message): Patient {
     const seg = hl7.segment('PID');
     if (seg === null) {
       throw new CastError('missing segment "PID"');
@@ -36,4 +36,27 @@ export class Patient {
     public martialStatus: string,
     public religion: string,
   ) {}
+
+  toHL7Segments(): string[][] {
+    return [[
+      'PID',
+      '',
+      '',
+      this.id,
+      '',
+      this.name,
+      '',
+      this.dob,
+      this.gender,
+      '',
+      this.race,
+      this.address,
+      '',
+      '',
+      '',
+      this.primaryLanguage,
+      this.martialStatus,
+      this.religion,
+    ]];
+  }
 }

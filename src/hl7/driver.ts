@@ -1,4 +1,4 @@
-import { Connection, Middleware } from '../hl7/connection';
+import { Connection, Middleware } from './connection';
 
 export interface Driver {
   onConnect?(conn: Connection): void;

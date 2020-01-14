@@ -25,6 +25,24 @@ function generateBasicModels() {
   const models = yaml.parse(modelsFile);
 
   for (const model of models) {
+    const values = {};
+    let highestField = 0;
+    for (const prop of model.properties) {
+      if (prop.field > highestField) {
+        highestField = prop.field;
+      }
+      values[prop.field] = `this.${prop.name}`;
+    }
+    model.fields = [];
+    for (let i = 1; i <= highestField; i++) {
+      const v = values[i];
+      if (v) {
+        model.fields.push(v);
+      } else {
+        model.fields.push("''");
+      }
+    }
+
     const output = mustache.render(tmpl, model);
     fs.writeFileSync(
       path.join(srcDir, 'esb', 'models', model['file']),
@@ -46,6 +64,12 @@ function generateObservationModels() {
   const models = yaml.parse(modelsFile);
 
   for (const model of models) {
+    let curSetID = 2;
+    for (const prop of model.properties) {
+      prop.setId = curSetID.toString();
+      curSetID++;
+    }
+
     const output = mustache.render(tmpl, model);
     fs.writeFileSync(
       path.join(srcDir, 'esb', 'models', model['file']),

@@ -7,11 +7,13 @@ export enum ACKCode {
   AR = 'AR',
 }
 
+export type Segment = string[]
+
 // TODO: parse escape character
-export class HL7Message {
+export class Message {
   constructor(
-    public json: string[][],
-    public readonly encodingChars: string = '^~\\&',
+    public segments: Segment[],
+    public readonly encodingChars: string = '^~\\\\&',
     public readonly fieldSep: string = '|',
   ) {
     this._repetitionSep = encodingChars[1];
@@ -19,9 +21,9 @@ export class HL7Message {
     this._subComponentSep = encodingChars[4];
   }
 
-  segment(id: string): string[] | null {
+  segment(id: string): Segment | null {
     id = id.toUpperCase();
-    for (const segment of this.json) {
+    for (const segment of this.segments) {
       if (segment[0] === id) {
         return segment;
       }
@@ -29,10 +31,10 @@ export class HL7Message {
     return null;
   }
 
-  allSegments(id: string): string[][] {
+  allSegments(id: string): Segment[] {
     const segments = [];
     id = id.toUpperCase();
-    for (const segment of this.json) {
+    for (const segment of this.segments) {
       if (segment[0] === id) {
         segments.push(segment);
       }
@@ -54,26 +56,31 @@ export class HL7Message {
 
   dump(): string {
     let out = '';
-    for (let i = 0; i < this.json.length - 1; i++) {
-      out += `${this.json[i].join(this.fieldSep)}\r`;
+    for (let i = 0; i < this.segments.length - 1; i++) {
+      out += `${this.segments[i].join(this.fieldSep)}\r`;
     }
-    out += `${this.json[this.json.length - 1].join(this.fieldSep)}`;
+    out += `${this.segments[this.segments.length - 1].join(this.fieldSep)}`;
     return out;
   }
 
-  createACK(ackCode: ACKCode, error?: string): HL7Message {
+  createACK(ackCode: ACKCode, error?: string): Message {
+    const originalMsh = this.segment('MSH');
+    if (!originalMsh) {
+      throw new RangeError('missing MSH segment');
+    }
+
     const msh = [
       'MSH',
       this.encodingChars,
-      this.json[0][4], // sending application, copied from original receiving application
-      this.json[0][5], // sending facility, copied from original receiving facility
-      this.json[0][2], // receiving application, copied from original sending application
-      this.json[0][3], // receiving facility, copied from original sending facility
+      originalMsh[4], // sending application, copied from original receiving application
+      originalMsh[5], // sending facility, copied from original receiving facility
+      originalMsh[2], // receiving application, copied from original sending application
+      originalMsh[3], // receiving facility, copied from original sending facility
       toHL7DateString(new Date()), // data/time
       '', // security
       'ACK', // message type
       `ACK-${uuidv1()}`, // message control ID
-      this.json[0][10], // processing ID
+      originalMsh[10], // processing ID
       '2.3', // version ID
       '', // sequence number
       '', // continuation pointer
@@ -84,12 +91,12 @@ export class HL7Message {
     const msa = [
       'MSA',
       ackCode.toString(), // acknowledgement code
-      this.json[0][9], // message control ID
+      originalMsh[9], // message control ID
       error, // error message
       '', // expected sequence number
       '', // delayed acknowledgement type
     ];
-    return new HL7Message([msh, msa], this.encodingChars, this.fieldSep);
+    return new Message([msh, msa], this.encodingChars, this.fieldSep);
   }
 
   private _repetitionSep: string;
@@ -98,7 +105,7 @@ export class HL7Message {
 }
 
 // TODO: parse escape character
-export function parse(msg: string): HL7Message {
+export function parse(msg: string): Message {
   const mshIdx = msg.indexOf('MSH');
   if (mshIdx === -1) {
     throw new HL7ParseError('missing "MSH" segment');
@@ -107,24 +114,54 @@ export function parse(msg: string): HL7Message {
   const fieldSep = msg[mshIdx+3];
   const encodingChars = msg.slice(4, 9);
 
-  const hl7Json = [];
-  const segments = msg.split(segmentSep);
-  for (const segment of segments) {
-    const fields = segment.split(fieldSep);
-    const jsonFields = [];
-    for (const field of fields) {
-      jsonFields.push(field);
+  const segments: Segment[] = [];
+  const segmentsRaw = msg.split(segmentSep);
+  for (const segment of segmentsRaw) {
+    const fieldsRaw = segment.split(fieldSep);
+    const fields: string[] = [];
+    for (const field of fieldsRaw) {
+      fields.push(field);
     }
-    hl7Json.push(jsonFields);
+    segments.push(fields);
   }
-  return new HL7Message(hl7Json, encodingChars);
+  return new Message(segments, encodingChars);
 }
 
-function toHL7DateString(date: Date): string {
+export function toHL7DateString(date: Date): string {
   return date.getFullYear() +
     (date.getMonth() + 1).toString().padStart(2, '0') +
     (date.getDate()).toString().padStart(2, '0') +
     (date.getHours()).toString().padStart(2, '0') +
     (date.getMinutes()).toString().padStart(2, '0') +
     (date.getSeconds()).toString().padStart(2, '0');
+}
+
+export function createHeader(
+  messageType: string,
+  recvApplication: string,
+  recvFacility: string,
+  encodingChars = '^~\\\\&',
+): Segment {
+  return [
+    'MSH',
+    encodingChars,
+    'ROMI', // sending application
+    'ROMI', // sending facility
+    recvApplication, // receiving application
+    recvFacility, // receiving facility
+    toHL7DateString(new Date()), // date/time of message
+    '', // security
+    messageType, // message type
+    `ROMI-${uuidv1()}`, // message control id
+     'P', // processing id
+     '2.3', // version id
+     '', // sequence number
+     '', // continuation pointer
+     'AL', // accept acknowledgement type
+     'NE', // application acknowledgement type
+     '', // country code
+     '', // character set
+     '', // principal language of message
+     '', // alternate character set handling scheme
+  ];
 }

@@ -1,9 +1,9 @@
 import * as net from 'net';
 import { Protocol as MLLPProtocol } from '../mllp';
-import { HL7Message, parse } from './parser';
+import { Message, parse } from './parser';
 
 export type Middleware =
-  (msg: HL7Message, connection: Connection, next: () => void) => void;
+  (msg: Message, connection: Connection, next: () => void) => void;
 
 export class Connection {
   get socket(): net.Socket {
@@ -22,12 +22,11 @@ export class Connection {
     this._mllp.on('message', msg => this._onMessage(msg));
   }
 
-  send(msg: HL7Message): void {
+  send(msg: Message): void {
     let i = 0;
     const next = () => {
       if (i < this._outgoingMdws.length) {
-        this._outgoingMdws[i](msg, this, next);
-        i++;
+        this._outgoingMdws[i++](msg, this, next);
       } else {
         MLLPProtocol.send(msg.dump(), this._socket);
       }
@@ -49,8 +48,7 @@ export class Connection {
     let i = 0;
     const next = () => {
       if (i < this._incomingMdws.length) {
-        this._incomingMdws[i](hl7, this, next);
-        i++;
+        this._incomingMdws[i++](hl7, this, next);
       }
     };
     next();

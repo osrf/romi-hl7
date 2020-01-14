@@ -3,23 +3,23 @@
  */
 
 import { CastError } from '..';
-import { HL7Message } from '../../hl7';
+import { Message, toHL7DateString } from '../../hl7';
 
 export class OperatingTheatre {
-  static fromHL7(hl7: HL7Message): OperatingTheatre {
+  static fromHL7(hl7: Message): OperatingTheatre {
     const msh = hl7.segment('MSH')!;
 
-    const messageType = hl7.components(msh[9]);
+    const messageType = hl7.components(msh[8]);
     if (messageType[0] !== 'ORU' || messageType[1] !== 'R01') {
       throw new CastError('wrong message type');
     }
 
-    const oru = hl7.segment('ORU');
-    if (oru === null) {
-      throw new CastError('missing ORU segment');
+    const obr = hl7.segment('OBR');
+    if (obr === null) {
+      throw new CastError('missing OBR segment');
     }
 
-    const observationId = hl7.components(oru[4]);
+    const observationId = hl7.components(obr[4]);
     if (observationId[0] !== 'OT') {
       throw new CastError('expected observation id "OT"');
     }
@@ -35,13 +35,13 @@ export class OperatingTheatre {
 
     const obxs = hl7.allSegments('OBX');
     for (const obx of obxs) {
-      const id = hl7.components(obx[4]);
+      const id = hl7.components(obx[3]);
       switch (id[0]) {
         case 'OTR_NO': {
           roomNumber = obx[5];
           break;
         }
-        case 'C_DISPLINE': {
+        case 'C_DISCIPLINE': {
           discipline = obx[5];
           break;
         }
@@ -93,4 +93,214 @@ export class OperatingTheatre {
     public surgeonName: string,
     public date: string,
   ) {}
+
+  toHL7Segments(): string[][] {
+    const now = toHL7DateString(new Date());
+    const segments: string[][] = [];
+
+    segments.push([
+      'OBR',
+      '1', // set id
+      '', // placer order number
+      '', // filler order number +
+      'OT', // universal service id
+      '', // priority
+      '', // requested date/time
+      now, // observation date/time #
+      '', // observation end date/time #
+      '', // collection volume *
+      '', // collector identifier *
+      '', // specimen action code *
+      '', // danger code
+      '', // relevant clinical info
+      '', // specimen received date/time *
+      '', // specimen source *
+      '', // ordering provider
+      '', // order callback phone number
+      '', // placer field 1
+      '', // placer field 2
+      '', // filler field 1 +
+      '', // filler field 2 +
+      now, // results rpt/status chng date/time +
+      '', // charge to practice +
+      '', // diagnostic serv sect id
+      'F', // result status +
+      '', // parent result +
+      '', // quantity/timing
+      '', // result copies to
+      '', // parent *
+      '', // transportation mode
+      '', // reason for study
+    ]);
+
+    segments.push([
+      'OBX',
+      '2', // set id
+      'ST', // value type
+      'OTR_NO', // observation identifier
+      '', // observation sub-id
+      this.roomNumber, // observation value
+      '', // units
+      '', // references range
+      '', // abnormal flags
+      '', // probability
+      '', // nature of abnormal test
+      'F', // observation result status
+      '', // date last obs normal values
+      '', // user defined access checks
+      now, // date/time of the observation
+      '', // producer's id
+      '', // responsible observer
+      '', // observation method
+    ]);
+
+    segments.push([
+      'OBX',
+      '3', // set id
+      'ST', // value type
+      'C_DISCIPLINE', // observation identifier
+      '', // observation sub-id
+      this.discipline, // observation value
+      '', // units
+      '', // references range
+      '', // abnormal flags
+      '', // probability
+      '', // nature of abnormal test
+      'F', // observation result status
+      '', // date last obs normal values
+      '', // user defined access checks
+      now, // date/time of the observation
+      '', // producer's id
+      '', // responsible observer
+      '', // observation method
+    ]);
+
+    segments.push([
+      'OBX',
+      '4', // set id
+      'ST', // value type
+      'C_CASETYPE', // observation identifier
+      '', // observation sub-id
+      this.caseType, // observation value
+      '', // units
+      '', // references range
+      '', // abnormal flags
+      '', // probability
+      '', // nature of abnormal test
+      'F', // observation result status
+      '', // date last obs normal values
+      '', // user defined access checks
+      now, // date/time of the observation
+      '', // producer's id
+      '', // responsible observer
+      '', // observation method
+    ]);
+
+    segments.push([
+      'OBX',
+      '5', // set id
+      'TS', // value type
+      'C_STARTTIME', // observation identifier
+      '', // observation sub-id
+      this.startTime, // observation value
+      '', // units
+      '', // references range
+      '', // abnormal flags
+      '', // probability
+      '', // nature of abnormal test
+      'F', // observation result status
+      '', // date last obs normal values
+      '', // user defined access checks
+      now, // date/time of the observation
+      '', // producer's id
+      '', // responsible observer
+      '', // observation method
+    ]);
+
+    segments.push([
+      'OBX',
+      '6', // set id
+      'TS', // value type
+      'C_ENDTIME', // observation identifier
+      '', // observation sub-id
+      this.endTime, // observation value
+      '', // units
+      '', // references range
+      '', // abnormal flags
+      '', // probability
+      '', // nature of abnormal test
+      'F', // observation result status
+      '', // date last obs normal values
+      '', // user defined access checks
+      now, // date/time of the observation
+      '', // producer's id
+      '', // responsible observer
+      '', // observation method
+    ]);
+
+    segments.push([
+      'OBX',
+      '7', // set id
+      'ST', // value type
+      'C_DETAILS', // observation identifier
+      '', // observation sub-id
+      this.details, // observation value
+      '', // units
+      '', // references range
+      '', // abnormal flags
+      '', // probability
+      '', // nature of abnormal test
+      'F', // observation result status
+      '', // date last obs normal values
+      '', // user defined access checks
+      now, // date/time of the observation
+      '', // producer's id
+      '', // responsible observer
+      '', // observation method
+    ]);
+
+    segments.push([
+      'OBX',
+      '8', // set id
+      'ST', // value type
+      'C_SURGEON_NAME', // observation identifier
+      '', // observation sub-id
+      this.surgeonName, // observation value
+      '', // units
+      '', // references range
+      '', // abnormal flags
+      '', // probability
+      '', // nature of abnormal test
+      'F', // observation result status
+      '', // date last obs normal values
+      '', // user defined access checks
+      now, // date/time of the observation
+      '', // producer's id
+      '', // responsible observer
+      '', // observation method
+    ]);
+
+    segments.push([
+      'OBX',
+      '9', // set id
+      'TS', // value type
+      'C_DATE', // observation identifier
+      '', // observation sub-id
+      this.date, // observation value
+      '', // units
+      '', // references range
+      '', // abnormal flags
+      '', // probability
+      '', // nature of abnormal test
+      'F', // observation result status
+      '', // date last obs normal values
+      '', // user defined access checks
+      now, // date/time of the observation
+      '', // producer's id
+      '', // responsible observer
+      '', // observation method
+    ]);
+
+    return segments;
+  }
 }

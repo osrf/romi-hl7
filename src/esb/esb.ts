@@ -1,20 +1,24 @@
 import { Observable, Subject } from 'rxjs';
-import { ACKCode, Connection, HL7Message } from '../hl7';
-import { Driver } from './driver';
+import { filter, map } from 'rxjs/operators';
+import * as hl7 from '../hl7';
 import { Endpoint } from './endpoint';
+import { CastError } from './error';
 
 export interface Request {
-  msg: HL7Message,
-  conn: Connection,
+  msg: hl7.Message,
+  conn: hl7.Connection,
 }
 
-export class ESB implements Driver {
+export type MessageType<T> = { fromHL7(hl7: hl7.Message): T };
+type MessageInstanceType<T> = T extends MessageType<infer U> ? U : never;
+
+export class ESB implements hl7.Driver {
   /**
    * Returns an observable event that fires when a HL7 message is received.
    */
   get messageObs(): Observable<Request> { return this._msgSubject; }
 
-  constructor(endpoints: Endpoint[]) {
+  constructor(...endpoints: Endpoint[]) {
     this._endpoints = endpoints;
 
     for (const ep of this._endpoints) {
@@ -23,32 +27,63 @@ export class ESB implements Driver {
   }
 
   /**
-   * Starts each endpoints, for server endpoints, this will start listening for connections, for
-   * client endpoints, this will establish a connection with the server.
+   * Starts all endpoints, this is equivalent to calling `start` on each endpoints.
    */
-  start() {
+  startAll() {
     for (const ep of this._endpoints) {
       ep.start();
     }
   }
 
   /**
-   * Sends a HL7 message to each supported endpoints, each endpoint have its own outgoing middleware
-   * that filters the messages that it supports.
+   * Sends a HL7 message to each supported endpoints.
    * @param msg
    */
-  send(msg: HL7Message): void {
+  broadcast(
+    segments: hl7.Segment[],
+    messageType: string,
+    recvApplication: string,
+    recvFacility: string,
+    encodingChars = '^~\\\\&',
+    fieldSep = '|',
+  ): void {
+    const msh = hl7.createHeader(messageType, recvApplication, recvFacility, encodingChars);
+    const msg = new hl7.Message([msh, ...segments], encodingChars, fieldSep);
     for (const ep of this._endpoints) {
       ep.send(msg);
     }
   }
 
-  onIncoming(msg: HL7Message, conn: Connection, _: () => void): void {
+  /**
+   * Returns an message observable that filters only messages of a certain type.
+   * @param messageType
+   */
+  filterMessageObs<
+    T extends MessageType<U>,
+    U = MessageInstanceType<T>,
+  >(messageType: T): Observable<U> {
+    let result: U;
+    return this.messageObs.pipe(filter(req => {
+      try {
+        result =  messageType.fromHL7(req.msg);
+        return true;
+      } catch (e) {
+        if (e instanceof CastError) {
+          return false;
+        }
+        throw e;
+      }
+    }), map(() => {
+      return result;
+    }));
+  }
+
+  onIncoming(msg: hl7.Message, conn: hl7.Connection, _: () => void): void {
     this._msgSubject.next({
       msg: msg,
       conn: conn,
     });
-    conn.send(msg.createACK(ACKCode.AA));
+    conn.send(msg.createACK(hl7.ACKCode.AA));
   }
 
   private _endpoints: Endpoint[];

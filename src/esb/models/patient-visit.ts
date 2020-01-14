@@ -3,10 +3,10 @@
  */
 
 import { CastError } from '..';
-import { HL7Message } from '../../hl7';
+import { Message } from '../../hl7';
 
 export class PatientVisit {
-  static fromHL7(hl7: HL7Message): PatientVisit {
+  static fromHL7(hl7: Message): PatientVisit {
     const seg = hl7.segment('PV1');
     if (seg === null) {
       throw new CastError('missing segment "PV1"');
@@ -40,4 +40,55 @@ export class PatientVisit {
     public admitDateTime: string,
     public actualDischargeDate: string,
   ) {}
+
+  toHL7Segments(): string[][] {
+    return [[
+      'PV1',
+      '',
+      this.typeCareLevel,
+      this.location,
+      this.caseType,
+      '',
+      '',
+      '',
+      '',
+      '',
+      this.service,
+      '',
+      '',
+      '',
+      this.admitVia,
+      '',
+      '',
+      '',
+      '',
+      this.case_,
+      this.treatmentClass,
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      this.dischargeDisposition,
+      this.dischargeLocation,
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      this.admitDateTime,
+      this.actualDischargeDate,
+    ]];
+  }
 }

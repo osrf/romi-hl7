@@ -3,10 +3,10 @@
  */
 
 import { CastError } from '..';
-import { HL7Message } from '../../hl7';
+import { Message } from '../../hl7';
 
 export class DiagnosisInfo {
-  static fromHL7(hl7: HL7Message): DiagnosisInfo {
+  static fromHL7(hl7: Message): DiagnosisInfo {
     const seg = hl7.segment('DG1');
     if (seg === null) {
       throw new CastError('missing segment "DG1"');
@@ -22,4 +22,14 @@ export class DiagnosisInfo {
     public diagnosis: string,
     public details: string,
   ) {}
+
+  toHL7Segments(): string[][] {
+    return [[
+      'DG1',
+      '',
+      '',
+      this.diagnosis,
+      this.details,
+    ]];
+  }
 }

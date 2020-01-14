@@ -1,8 +1,9 @@
 import { EventEmitter } from 'events';
 import * as net from 'net';
+import { Driver } from './driver';
 import { Connection, Middleware } from './connection';
 
-class Base extends EventEmitter {
+export class BaseApp extends EventEmitter {
   addListener(event: 'connection', listener: (conn: Connection) => void): this;
   addListener(event: string, listener: (...args: any[]) => void): this;
   addListener(event: string, listener: (...args: any[]) => void): this {
@@ -39,6 +40,18 @@ class Base extends EventEmitter {
     return super.prependOnceListener(event, listener);
   }
 
+  useDriver(driver: Driver) {
+    if (driver.onConnect) {
+      this.on('connection', conn => driver.onConnect!(conn));
+    }
+    if (driver.onIncoming) {
+      this._incomingMdws.push((msg, conn, next) => driver.onIncoming!(msg, conn, next));
+    }
+    if (driver.onOutgoing) {
+      this._outgoingMdws.push((msg, conn, next) => driver.onOutgoing!(msg, conn, next));
+    }
+  }
+
   useIncoming(middleware: Middleware) {
     this._incomingMdws.push(middleware);
   }
@@ -51,7 +64,7 @@ class Base extends EventEmitter {
   protected _outgoingMdws: Middleware[] = [];
 }
 
-export class Client extends Base {
+export class Client extends BaseApp {
   async connect(port: number, host: string): Promise<Connection> {
     const socket = net.connect(port, host);
     return new Promise<Connection>(res => {
@@ -64,7 +77,7 @@ export class Client extends Base {
   }
 }
 
-export class Server extends Base {
+export class Server extends BaseApp {
   constructor() {
     super();
     this._server = new net.Server(socket => this._onConnection(socket));
