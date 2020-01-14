@@ -2,14 +2,14 @@
  * DO NOT EDIT, this is a generated file.
  */
 
-import { CastError } from '..';
+import { SerializationError } from '..';
 import { Message } from '../../hl7';
 
 export class {{class}} {
   static fromHL7(hl7: Message): {{class}} {
     const seg = hl7.segment('{{segment}}');
     if (seg === null) {
-      throw new CastError('missing segment "{{segment}}"');
+      throw new SerializationError('missing segment "{{segment}}"');
     }
 
     return new {{class}}(

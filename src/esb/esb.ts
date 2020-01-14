@@ -2,7 +2,7 @@ import { Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import * as hl7 from '../hl7';
 import { Endpoint } from './endpoint';
-import { CastError } from './error';
+import { SerializationError } from './error';
 
 export interface Request {
   msg: hl7.Message;
@@ -68,7 +68,7 @@ export class ESB implements hl7.Driver {
         result =  messageType.fromHL7(req.msg);
         return true;
       } catch (e) {
-        if (e instanceof CastError) {
+        if (e instanceof SerializationError) {
           return false;
         }
         throw e;

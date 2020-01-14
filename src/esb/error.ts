@@ -1,1 +1,1 @@
-export class CastError extends Error {}
+export class SerializationError extends Error {}
