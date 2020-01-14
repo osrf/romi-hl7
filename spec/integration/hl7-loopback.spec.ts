@@ -1,7 +1,7 @@
 import * as net from 'net';
-import { Client, parse, Server, Driver } from '../../src/hl7';
-import { readTestFile } from '../support/utils';
 import { OperatingTheatre } from '../../src/esb/models';
+import { Client, Driver, parse, Server } from '../../src/hl7';
+import { readTestFile } from '../support/utils';
 
 describe('hl7 loopback tests', () => {
   let serverApp: Server;

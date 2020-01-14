@@ -24,6 +24,7 @@
     "semi": "error",
     "prefer-const": "warn",
     "max-len": ["warn", { "code": 100 }],
-    "@typescript-eslint/no-non-null-assertion": "off"
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-explicit-any": "off"
   }
 }

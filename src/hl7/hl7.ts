@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// needed to provide generic implementation for EventEmitter methods
-
 import { EventEmitter } from 'events';
 import * as net from 'net';
 import { Driver } from './driver';
@@ -43,6 +40,10 @@ export class BaseApp extends EventEmitter {
     return super.prependOnceListener(event, listener);
   }
 
+  /**
+   * Registers a driver.
+   * @param driver
+   */
   useDriver(driver: Driver): void {
     if (driver.onConnect) {
       this.on('connection', conn => driver.onConnect!(conn));
@@ -55,10 +56,18 @@ export class BaseApp extends EventEmitter {
     }
   }
 
+  /**
+   * Registers an incoming middleware.
+   * @param middleware
+   */
   useIncoming(middleware: Middleware): void {
     this._incomingMdws.push(middleware);
   }
 
+  /**
+   * Registers an outgoing middleware.
+   * @param middleware
+   */
   useOutgoing(middleware: Middleware): void {
     this._outgoingMdws.push(middleware);
   }
@@ -81,16 +90,16 @@ export class Client extends BaseApp {
 }
 
 export class Server extends BaseApp {
+  readonly baseServer: net.Server;
+
   constructor() {
     super();
-    this._server = new net.Server(socket => this._onConnection(socket));
+    this.baseServer = new net.Server(socket => this._onConnection(socket));
   }
 
   listen(port: number, host?: string): net.Server {
-    return this._server.listen(port, host);
+    return this.baseServer.listen(port, host);
   }
-
-  private _server: net.Server;
 
   private _onConnection(socket: net.Socket): void {
     const conn = new Connection(socket, this._incomingMdws, this._outgoingMdws);

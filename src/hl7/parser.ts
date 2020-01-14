@@ -30,6 +30,10 @@ export class Message {
     this._subComponentSep = encodingChars[4];
   }
 
+  /**
+   * Gets the first segment in the message with the corresponding id.
+   * @param id
+   */
   segment(id: string): Segment | null {
     id = id.toUpperCase();
     for (const segment of this.segments) {
@@ -40,6 +44,10 @@ export class Message {
     return null;
   }
 
+  /**
+   * Gets all segments in the message with the corresponding id.
+   * @param id
+   */
   allSegments(id: string): Segment[] {
     const segments = [];
     id = id.toUpperCase();
@@ -51,18 +59,37 @@ export class Message {
     return segments;
   }
 
+  /**
+   * Gets the repetitions of a field, a field consists of one or more repetitions, which consists of
+   * one or more components, which consists of one or more subcomponents.
+   * @param field
+   */
   repetitions(field: string): string[] {
     return field.split(this._repetitionSep);
   }
 
-  components(field: string): string[] {
-    return field.split(this._componentSep);
+  /**
+   * Gets the components of a repetition, a field consists of one or more repetitions, which
+   * consists of one or more components, which consists of one or more subcomponents.
+   * @param repetition If a field only has one repetition, it is possible to use the field directly
+   * without resolving its repetitions.
+   */
+  components(repetition: string): string[] {
+    return repetition.split(this._componentSep);
   }
 
+  /**
+   * Gets the subcomponents of a component, a field consists of one or more repetitions, which
+   * consists of one or more components, which consists of one or more subcomponents.
+   * @param component
+   */
   subcomponents(component: string): string[] {
     return component.split(this._subComponentSep);
   }
 
+  /**
+   * Serializes this message into HL7 form.
+   */
   dump(): string {
     let out = '';
     for (let i = 0; i < this.segments.length - 1; i++) {
@@ -72,6 +99,11 @@ export class Message {
     return out;
   }
 
+  /**
+   * Creates an ACK message for this message.
+   * @param ackCode
+   * @param error
+   */
   createACK(ackCode: ACKCode, error?: string): Message {
     const originalMsh = this.segment('MSH');
     if (!originalMsh) {
@@ -106,6 +138,14 @@ export class Message {
       '', // delayed acknowledgement type
     ];
     return new Message([msh, msa], this.encodingChars, this.fieldSep);
+  }
+
+  /**
+   * Equivalent to segments.push(...args)
+   * @param segments
+   */
+  push(segments: Segment[]): void {
+    this.segments.push(...segments);
   }
 
   private _repetitionSep: string;

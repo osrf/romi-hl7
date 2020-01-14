@@ -22,6 +22,10 @@ export class Connection {
     this._mllp.on('message', msg => this._onMessage(msg));
   }
 
+  /**
+   * Sends a HL7 message.
+   * @param msg
+   */
   send(msg: Message): void {
     let i = 0;
     const next = (): void => {
@@ -34,6 +38,9 @@ export class Connection {
     next();
   }
 
+  /**
+   * Closes the connection, equivalent to calling `end()` on the underlying socket.
+   */
   end(): void {
     this._socket.end();
   }

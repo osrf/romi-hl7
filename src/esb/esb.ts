@@ -50,7 +50,7 @@ export class ESB implements hl7.Driver {
     const msh = hl7.createHeader(messageType, recvApplication, recvFacility, encodingChars);
     const msg = new hl7.Message([msh, ...segments], encodingChars, fieldSep);
     for (const ep of this._endpoints) {
-      ep.send(msg);
+      ep.broadcast(msg);
     }
   }
 

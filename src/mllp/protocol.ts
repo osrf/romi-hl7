@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// needed to provide generic implementation for EventEmitter methods
-
 import { EventEmitter } from 'events';
 import { Readable, Writable } from 'stream';
 

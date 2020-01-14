@@ -5,7 +5,13 @@ export interface Endpoint {
   readonly app: hl7.BaseApp;
   start(): void;
   stop(): void;
-  send(msg: hl7.Message): void;
+
+  /**
+   * Sends a HL7 message to all connected peers.
+   * @param msg
+   */
+  broadcast(msg: hl7.Message): void;
+
   useDriver(driver: hl7.Driver): void;
 }
 
@@ -19,12 +25,6 @@ export class ServerEndpoint implements Endpoint {
     this._app.on('connection', conn => this._onConnection(conn));
   }
 
-  private _port: number;
-  private _host?: string;
-  private _app: hl7.Server;
-  private _server?: net.Server;
-  private _connections = new Set<hl7.Connection>();
-
   start(): void {
     this._app.listen(this._port, this._host);
   }
@@ -33,7 +33,7 @@ export class ServerEndpoint implements Endpoint {
     this._server?.close();
   }
 
-  send(msg: hl7.Message): void {
+  broadcast(msg: hl7.Message): void {
     const it = this._connections.values();
     let next = it.next();
     while (!next.done) {
@@ -45,6 +45,12 @@ export class ServerEndpoint implements Endpoint {
   useDriver(driver: hl7.Driver): void {
     this._app.useDriver(driver);
   }
+
+  private _port: number;
+  private _host?: string;
+  private _app: hl7.Server;
+  private _server?: net.Server;
+  private _connections = new Set<hl7.Connection>();
 
   private _onConnection(conn: hl7.Connection): void {
     conn.socket.on('close', () => {
@@ -64,11 +70,6 @@ export class ClientEndpoint implements Endpoint {
     this._app.on('connection', conn => this._conn = conn);
   }
 
-  private _port: number;
-  private _host: string;
-  private _app: hl7.Client;
-  private _conn?: hl7.Connection;
-
   start(): void {
     this._app.connect(this._port, this._host);
   }
@@ -77,11 +78,16 @@ export class ClientEndpoint implements Endpoint {
     this._conn?.end();
   }
 
-  send(msg: hl7.Message): void {
+  broadcast(msg: hl7.Message): void {
     this._conn?.send(msg);
   }
 
   useDriver(driver: hl7.Driver): void {
     this._app.useDriver(driver);
   }
+
+  private _port: number;
+  private _host: string;
+  private _app: hl7.Client;
+  private _conn?: hl7.Connection;
 }
