@@ -21,17 +21,7 @@ export class ESB implements hl7.Driver {
    * Sends a HL7 message to each connected peers.
    * @param msg
    */
-  broadcast(
-    segments: hl7.Segment[],
-    messageType: string,
-    recvApplication: string,
-    recvFacility: string,
-    encodingChars = '^~\\\\&',
-    fieldSep = '|',
-  ): void {
-    const msh = hl7.createHeader(messageType, recvApplication, recvFacility, encodingChars);
-    const msg = new hl7.Message([msh, ...segments], encodingChars, fieldSep);
-
+  broadcast(msg: hl7.Message): void {
     for (const conn of this._connections) {
       conn.send(msg);
     }
