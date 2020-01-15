@@ -45,8 +45,8 @@ export class BaseApp extends EventEmitter {
    * @param driver
    */
   useDriver(driver: Driver): void {
-    if (driver.onConnect) {
-      this.on('connection', conn => driver.onConnect!(conn));
+    if (driver.onConnection) {
+      this.on('connection', conn => driver.onConnection!(conn));
     }
     if (driver.onIncoming) {
       this._incomingMdws.push((msg, conn, next) => driver.onIncoming!(msg, conn, next));
@@ -72,8 +72,8 @@ export class BaseApp extends EventEmitter {
     this._outgoingMdws.push(middleware);
   }
 
-  protected _incomingMdws: Middleware[] = [];
-  protected _outgoingMdws: Middleware[] = [];
+  protected readonly _incomingMdws: Middleware[] = [];
+  protected readonly _outgoingMdws: Middleware[] = [];
 }
 
 export class Client extends BaseApp {

@@ -1,13 +1,15 @@
-import { ESB, ServerEndpoint } from '../src/esb';
+import { ESB } from '../src/esb';
 import { OperatingTheatre } from '../src/esb/models';
+import { Server } from '../src/hl7';
 
 function subscribeOperatingTheatre(): void {
-  const endpoint = new ServerEndpoint(50001, 'localhost');
-  const esb = new ESB(endpoint);
+  const server = new Server();
+  const esb = new ESB();
+  server.useDriver(esb);
+  server.listen(50001, 'localhost');
   esb.filterMessageObs(OperatingTheatre).subscribe(ot => {
     console.log(ot);
   });
-  esb.startAll();
 }
 
 subscribeOperatingTheatre();

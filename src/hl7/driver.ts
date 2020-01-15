@@ -5,7 +5,7 @@ import { Connection, Middleware } from './connection';
  * between the hardware and romi-hl7.
  */
 export interface Driver {
-  onConnect?(conn: Connection): void;
+  onConnection?(conn: Connection): void;
   onIncoming?: Middleware;
   onOutgoing?: Middleware;
 }

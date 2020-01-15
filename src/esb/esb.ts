@@ -1,7 +1,6 @@
 import { Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import * as hl7 from '../hl7';
-import { Endpoint } from './endpoint';
 import { SerializationError } from './error';
 
 export interface Request {
@@ -18,25 +17,8 @@ export class ESB implements hl7.Driver {
    */
   get messageObs(): Observable<Request> { return this._msgSubject; }
 
-  constructor(...endpoints: Endpoint[]) {
-    this._endpoints = endpoints;
-
-    for (const ep of this._endpoints) {
-      ep.useDriver(this);
-    }
-  }
-
   /**
-   * Starts all endpoints, this is equivalent to calling `start` on each endpoints.
-   */
-  startAll(): void {
-    for (const ep of this._endpoints) {
-      ep.start();
-    }
-  }
-
-  /**
-   * Sends a HL7 message to each supported endpoints.
+   * Sends a HL7 message to each connected peers.
    * @param msg
    */
   broadcast(
@@ -49,8 +31,9 @@ export class ESB implements hl7.Driver {
   ): void {
     const msh = hl7.createHeader(messageType, recvApplication, recvFacility, encodingChars);
     const msg = new hl7.Message([msh, ...segments], encodingChars, fieldSep);
-    for (const ep of this._endpoints) {
-      ep.broadcast(msg);
+
+    for (const conn of this._connections) {
+      conn.send(msg);
     }
   }
 
@@ -78,6 +61,13 @@ export class ESB implements hl7.Driver {
     }));
   }
 
+  onConnection(conn: hl7.Connection): void {
+    this._connections.add(conn);
+    conn.socket.on('close', () => {
+      this._connections.delete(conn);
+    });
+  }
+
   onIncoming(msg: hl7.Message, conn: hl7.Connection): void {
     this._msgSubject.next({
       msg: msg,
@@ -86,6 +76,6 @@ export class ESB implements hl7.Driver {
     conn.send(msg.createACK(hl7.ACKCode.AA));
   }
 
-  private _endpoints: Endpoint[];
+  private _connections = new Set<hl7.Connection>();
   private _msgSubject = new Subject<Request>();
 }

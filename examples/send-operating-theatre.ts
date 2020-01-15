@@ -1,5 +1,5 @@
 import { OperatingTheatre } from '../src/esb/models';
-import { Client, Message, createHeader } from '../src/hl7';
+import { Client, createHeader, Message } from '../src/hl7';
 
 async function sendOperatingTheatre(): Promise<void> {
   const client = new Client();
