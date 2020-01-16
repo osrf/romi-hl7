@@ -1,5 +1,4 @@
 import * as net from 'net';
-import { OperatingTheatre } from '../../src/esb/models';
 import { Client, Driver, parse, Server } from '../../src/hl7';
 import { readTestFile } from '../support/utils';
 
@@ -26,8 +25,6 @@ describe('hl7 loopback tests', () => {
       conn.send(msg);
     });
     clientApp.useIncoming(msg => {
-      const ot = OperatingTheatre.fromHL7(msg);
-      expect(ot.roomNumber).toBe('2A');
       expect(msg.dump()).toBe(data);
       done();
     });

@@ -3,8 +3,9 @@
   "version": "0.0.1",
   "description": "hl7 + mllp protocol for RoMi",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
-    "build": "node scripts/generate-models.js && tsc",
+    "build": "node scripts/generate-models.js && tsc && cp package.json package-lock.json dist/src",
     "watch": "tsc --watch",
     "test": "jasmine",
     "clean": "rm -rf dist && rm -rf src/esb/models",

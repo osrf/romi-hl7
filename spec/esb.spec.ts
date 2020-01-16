@@ -1,9 +1,9 @@
 import * as net from 'net';
 import * as typemoq from 'typemoq';
 import { ESB } from '../src/esb';
+import { OperatingTheatre } from '../src/esb/models';
 import { Connection, parse } from '../src/hl7';
 import { readTestFile } from './support/utils';
-import { OperatingTheatre } from '../src/esb/models';
 
 function createMockConnection(): typemoq.IMock<Connection> {
   const mockSocket = typemoq.Mock.ofType<net.Socket>();

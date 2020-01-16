@@ -5,10 +5,10 @@ const yaml = require('yaml');
 
 const tmplDir = path.join(__dirname, '..', 'templates');
 const srcDir = path.join(__dirname, '..', 'src');
+const modelsDir = path.join(srcDir, 'esb', 'models');
 
 const indexExports = [];
 
-const modelsDir = path.join(srcDir, 'esb', 'models');
 if (!fs.existsSync(modelsDir)) {
   fs.mkdirSync(modelsDir);
 }
