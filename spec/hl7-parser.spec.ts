@@ -8,6 +8,7 @@ describe('hl7 parser tests', () => {
     expect(hl7.segments[0][0]).toBe('MSH');
     expect(hl7.segments[0][2]).toBe('OTM');
     const pid = hl7.segment('PID')!;
+    expect(pid).toBeDefined();
     expect(pid[0]).toBe('PID');
     expect(pid[1]).toBe('');
     expect(pid[3]).toBe('S8012345Z^J^M11^MRN');
