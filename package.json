@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@types/uuid": "^3.4.6",
+    "moment": "^2.24.0",
     "uuid": "^3.3.3"
   }
 }
