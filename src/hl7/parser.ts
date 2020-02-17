@@ -1,7 +1,8 @@
+import * as moment from 'moment';
 import * as uuidv1 from 'uuid/v1';
 import { toHL7DateString } from './date-utils';
 
-export class HL7ParseError extends Error { }
+export class ParseError extends Error { }
 
 export enum ACKCode {
   AA = 'AA',
@@ -19,12 +20,12 @@ export type Segment = string[]
 export class Message {
   constructor(
     public segments: Segment[],
-    public readonly encodingChars: string = '^~\\\\&',
+    public readonly encodingChars: string = '^~\\&',
     public readonly fieldSep: string = '|',
   ) {
     this._repetitionSep = encodingChars[1];
     this._componentSep = encodingChars[0];
-    this._subComponentSep = encodingChars[4];
+    this._subComponentSep = encodingChars[3];
   }
 
   /**
@@ -114,7 +115,7 @@ export class Message {
       originalMsh[5], // sending facility, copied from original receiving facility
       originalMsh[2], // receiving application, copied from original sending application
       originalMsh[3], // receiving facility, copied from original sending facility
-      toHL7DateString(new Date()), // data/time
+      toHL7DateString(moment()), // data/time
       '', // security
       'ACK', // message type
       `ACK-${uuidv1()}`, // message control ID
@@ -154,11 +155,11 @@ export class Message {
 export function parse(msg: string): Message {
   const mshIdx = msg.indexOf('MSH');
   if (mshIdx === -1) {
-    throw new HL7ParseError('missing "MSH" segment');
+    throw new ParseError('missing "MSH" segment');
   }
   const segmentSep = '\r';
   const fieldSep = msg[mshIdx+3];
-  const encodingChars = msg.slice(4, 9);
+  const encodingChars = msg.slice(4, 8);
 
   const segments: Segment[] = [];
   const segmentsRaw = msg.split(segmentSep);
@@ -177,7 +178,7 @@ export function createHeader(
   messageType: string,
   recvApplication: string,
   recvFacility: string,
-  encodingChars = '^~\\\\&',
+  encodingChars = '^~\\&',
 ): Segment {
   return [
     'MSH',
@@ -186,7 +187,7 @@ export function createHeader(
     'ROMI', // sending facility
     recvApplication, // receiving application
     recvFacility, // receiving facility
-    toHL7DateString(new Date()), // date/time of message
+    toHL7DateString(moment()), // date/time of message
     '', // security
     messageType, // message type
     `ROMI-${uuidv1()}`, // message control id

@@ -11,7 +11,7 @@ export enum Precision {
 }
 
 export function toHL7DateString(
-  date: Date,
+  date: moment.Moment,
   includeTZ = true,
   precision = Precision.Seconds,
 ): string {
@@ -40,10 +40,10 @@ export function toHL7DateString(
   if (includeTZ) {
     formatString += 'ZZ';
   }
-  return moment(date).format(formatString);
+  return date.format(formatString);
 }
 
-export function fromHL7DateString(dateString: string): Date {
+export function fromHL7DateString(dateString: string): moment.Moment {
   const formats = [
     'YYYYZZ',
     'YYYYMMZZ',
@@ -53,5 +53,5 @@ export function fromHL7DateString(dateString: string): Date {
     'YYYYMMDDHHmmssZZ',
     'YYYYMMDDHHmmss.SSSZZ'
   ];
-  return moment(dateString, formats).toDate();
+  return moment(dateString, formats);
 }
