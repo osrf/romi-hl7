@@ -1,7 +1,7 @@
 import { ACKCode, parse } from '../src/hl7';
 import { readTestFile } from './support/utils';
 
-describe('hl7 parser tests', () => {
+describe('hl7 parser', () => {
   it('can parse message', () => {
     const msg = readTestFile('operating-theatre.bin');
     const hl7 = parse(msg);
@@ -32,9 +32,9 @@ describe('hl7 parser tests', () => {
     const msg = readTestFile('operating-theatre.bin');
     const hl7 = parse(msg);
     const obx = hl7.allSegments('OBX');
-    expect(obx.length).toBe(6);
+    expect(obx.length).toBe(8);
     expect(obx[0][3]).toBe('OTR_NO^OTRoomNumber');
-    expect(obx[5][3]).toBe('C_DETAILS^Case Details');
+    expect(obx[7][3]).toBe('C_DETAILS^Case Details');
   });
 
   it('dumps message correctly', () => {
@@ -50,7 +50,7 @@ describe('hl7 parser tests', () => {
 
     const msh = ack.segments[0];
     expect(msh[0]).toBe('MSH');
-    expect(msh[1]).toBe('^~\\\\&');
+    expect(msh[1]).toBe('^~\\&');
     expect(msh[2]).toBe('ESB');
     expect(msh[3]).toBe('ESB');
     expect(msh[4]).toBe('OTM');

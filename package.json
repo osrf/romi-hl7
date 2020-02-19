@@ -2,10 +2,11 @@
   "name": "@romi/hl7",
   "version": "0.0.1",
   "description": "hl7 + mllp protocol for RoMi",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
-    "build": "tsc && cp package.json dist/src",
+    "build": "tsc",
+    "prepublish": "npm run build",
     "watch": "tsc --watch",
     "test": "jasmine",
     "clean": "rm -rf dist",
@@ -27,5 +28,8 @@
     "@types/uuid": "^3.4.6",
     "moment": "^2.24.0",
     "uuid": "^3.3.3"
-  }
+  },
+  "files": [
+    "dist/src/"
+  ]
 }
