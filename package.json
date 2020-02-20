@@ -1,5 +1,5 @@
 {
-  "name": "@romi/hl7",
+  "name": "@osrf/romi-hl7",
   "version": "0.0.1",
   "description": "hl7 + mllp protocol for RoMi",
   "main": "dist/src/index.js",
@@ -11,6 +11,10 @@
     "test": "jasmine",
     "clean": "rm -rf dist",
     "lint": "eslint . --ext .ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/osrf/romi-hl7"
   },
   "author": "Teo Koon Peng <koonpeng@openrobotics.org>",
   "license": "Apache-2.0",
