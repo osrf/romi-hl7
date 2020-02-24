@@ -1,6 +1,6 @@
 {
   "name": "@osrf/romi-hl7",
-  "version": "0.0.1",
+  "version": "0.0.2-alpha.0",
   "description": "hl7 + mllp protocol for RoMi",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
